@@ -1,7 +1,9 @@
-# ACES Service BTC-SPV-ARK Channel Service
+# ACES Bitcoin-Ark Lite Channel Service
 
-ACES BTC to ARK channel service using Bitcoin Electrum such that service providers
+ACES Bitcoin to Ark channel service using Bitcoin Electrum such that service providers
 do not need to run a full bitcoin node to run this service.
+
+https://electrumx.readthedocs.io/en/latest/protocol.html
 
 ## Set up local database
 
