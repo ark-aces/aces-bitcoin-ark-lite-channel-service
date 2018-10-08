@@ -1,0 +1,145 @@
+serverInfo:
+  name: "Aces BTC-ARK Lite Channel Service"
+  description: "ACES BTC to ARK Lite Channel service for transferring BTC to ARK"
+  instructions: >
+    After this contract is executed, any BTC sent to depositBtcAddress will be exchanged for ARK and 
+    sent directly to the given recipientArkAddress less service fees.
+  version: "1.0.0"
+  websiteUrl: "https://arkaces.com"
+  inputSchema: >
+    {
+      "type": "object",
+      "properties": {
+        "recipientArkAddress": {
+          "type": "string",
+          "title": "Recipient ARK Address",
+          "description": "Enter recipient ARK address to transfer funds to."
+        },
+         "returnBtcAddress": {
+            "type": "string",
+            "title": "Return BTC Address",
+            "description": "Enter return BTC address to send returns to."
+          }
+      },
+      "required": [
+        "recipientArkAddress"
+      ]
+    }
+  outputSchema: >
+    {
+      "type": "object",
+      "properties": {
+        "depositBtcAddress": {
+          "type": "string"
+        },
+        "recipientArkAddress": {
+          "type": "string"
+        },
+        "transfers": {
+          "type": "array",
+          "properties": {
+            "btcAmount": {
+              "type": "string"
+            },
+            "btcToArkRate": {
+              "type": "string"
+            },
+            "btcFlatFee": {
+              "type": "string"
+            },
+            "btcPercentFee": {
+              "type": "string"
+            },
+            "btcTotalFee": {
+              "type": "string"
+            },
+            "arkSendAmount": {
+              "type": "string"
+            },
+            "arkTransactionId": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+
+spring:
+  datasource:
+    platform: "postgres"
+    url: "jdbc:postgresql://localhost:5432/aces_btc_ark_lite_channel_service_db"
+    username: "postgres"
+    password: "password"
+  jpa:
+    hibernate:
+      ddl-auto: "validate"
+
+arkNetworkConfigPath: "ark_network_config/mainnet.yml"
+
+serviceCapacityUnit: "ARK"
+
+serviceCapacityUpdateIntervalSec: 3600
+
+bitcoinScanIntervalSec: 10
+
+flatFee:
+  amount: 0.0001
+  unit: "BTC"
+
+percentFee: 1
+
+server:
+  port: 9190
+
+serviceArkAccount:
+  address: "change-me"
+  passphrase: "change-me"
+
+serviceBitcoinAccount:
+  privateKey: "change-me"
+
+bitcoinMinConfirmations: 1
+
+electrumSeedPeers:
+-
+  host: 'erbium1.sytes.net'
+  port: 50001
+-
+  host: 'ecdsa.net'
+  port: 50001
+-
+  host: 'VPS.hsmiths.com'
+  port: 50001
+-
+  host: 'electrum.be'
+  port: 50001
+-
+  host: 'helicarrier.bauerj.eu'
+  port: 50001
+-
+  host: 'elex01.blackpole.online'
+  port: 50001
+-
+  host: 'electrumx.not.fyi'
+  port: 50001
+-
+  host: 'node.xbt.eu'
+  port: 50001
+-
+  host: 'kirsche.emzy.de'
+  port: 50001
+-
+  host: 'us11.einfachmalnettsein.de'
+  port: 50001
+-
+  host: 'Electrum.hsmiths.com'
+  port: 8080
+-
+  host: 'electrum3.hachre.de'
+  port: 50001
+-
+  host: 'btc.smsys.me'
+  port: 110
