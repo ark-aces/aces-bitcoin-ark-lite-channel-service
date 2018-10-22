@@ -1,6 +1,7 @@
 package com.arkaces.bitcoin_ark_lite_channel_service.transfer;
 
 import com.arkaces.bitcoin_ark_lite_channel_service.Constants;
+import com.arkaces.bitcoin_ark_lite_channel_service.ServiceBitcoinAccountSettings;
 import com.arkaces.bitcoin_ark_lite_channel_service.ark.ArkService;
 import com.arkaces.bitcoin_ark_lite_channel_service.contract.ContractEntity;
 import com.arkaces.bitcoin_ark_lite_channel_service.electrum.ElectrumService;
@@ -26,6 +27,7 @@ public class TransferService {
     private final ElectrumService electrumService;
     private final ServiceCapacityService serviceCapacityService;
     private final ServiceCapacityRepository serviceCapacityRepository;
+    private final ServiceBitcoinAccountSettings serviceBitcoinAccountSettings;
 
     /**
      * @return true if amount reserved successfully
@@ -94,7 +96,11 @@ public class TransferService {
 
         String returnBtcAddress = transferEntity.getContractEntity().getReturnBtcAddress();
         if (returnBtcAddress != null) {
-            String returnBtcTransactionId = electrumService.sendTransaction(returnBtcAddress, transferEntity.getBtcAmount());
+            String returnBtcTransactionId = electrumService.sendTransaction(
+                    returnBtcAddress,
+                    transferEntity.getBtcAmount(),
+                    serviceBitcoinAccountSettings.getPrivateKey()
+            );
             transferEntity.setStatus(TransferStatus.RETURNED);
             transferEntity.setReturnBtcTransactionId(returnBtcTransactionId);
         } else {

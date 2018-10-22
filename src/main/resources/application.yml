@@ -1,3 +1,16 @@
+server:
+  port: 9190
+
+spring:
+  datasource:
+    platform: "postgres"
+    url: "jdbc:postgresql://localhost:5432/aces_btc_ark_lite_channel_service_db"
+    username: "postgres"
+    password: "password"
+  jpa:
+    hibernate:
+      ddl-auto: "validate"
+
 serverInfo:
   name: "Aces BTC-ARK Lite Channel Service"
   description: "ACES BTC to ARK Lite Channel service for transferring BTC to ARK"
@@ -67,16 +80,6 @@ serverInfo:
       }
     }
 
-spring:
-  datasource:
-    platform: "postgres"
-    url: "jdbc:postgresql://localhost:5432/aces_btc_ark_lite_channel_service_db"
-    username: "postgres"
-    password: "password"
-  jpa:
-    hibernate:
-      ddl-auto: "validate"
-
 arkNetworkConfigPath: "ark_network_config/mainnet.yml"
 
 serviceCapacityUnit: "ARK"
@@ -91,9 +94,6 @@ flatFee:
 
 percentFee: 1
 
-server:
-  port: 9190
-
 serviceArkAccount:
   address: "change-me"
   passphrase: "change-me"
@@ -103,43 +103,4 @@ serviceBitcoinAccount:
 
 bitcoinMinConfirmations: 1
 
-electrumSeedPeers:
--
-  host: 'erbium1.sytes.net'
-  port: 50001
--
-  host: 'ecdsa.net'
-  port: 50001
--
-  host: 'VPS.hsmiths.com'
-  port: 50001
--
-  host: 'electrum.be'
-  port: 50001
--
-  host: 'helicarrier.bauerj.eu'
-  port: 50001
--
-  host: 'elex01.blackpole.online'
-  port: 50001
--
-  host: 'electrumx.not.fyi'
-  port: 50001
--
-  host: 'node.xbt.eu'
-  port: 50001
--
-  host: 'kirsche.emzy.de'
-  port: 50001
--
-  host: 'us11.einfachmalnettsein.de'
-  port: 50001
--
-  host: 'Electrum.hsmiths.com'
-  port: 8080
--
-  host: 'electrum3.hachre.de'
-  port: 50001
--
-  host: 'btc.smsys.me'
-  port: 110
+electrumNetworkConfigPath: "electrum_network_config/mainnet.yml"

@@ -1,6 +1,5 @@
 package com.arkaces.bitcoin_ark_lite_channel_service.bitcoin_listener;
 
-import com.arkaces.bitcoin_ark_lite_channel_service.Config;
 import com.arkaces.bitcoin_ark_lite_channel_service.contract.ContractEntity;
 import com.arkaces.bitcoin_ark_lite_channel_service.contract.ContractRepository;
 import com.arkaces.bitcoin_ark_lite_channel_service.electrum.ElectrumRpcClient;
@@ -12,7 +11,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bitcoinj.core.ECKey;
+import org.apache.tomcat.util.buf.HexUtils;
+import org.bitcoinj.core.*;
+import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -30,9 +32,9 @@ public class BitcoinListener {
 
     private final ElectrumRpcClient electrumRpcClient;
     private final ContractRepository contractRepository;
-    private final Config config;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Integer bitcoinMinConfirmations;
+    private final NetworkParameters bitcoinNetworkParameters;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -49,12 +51,13 @@ public class BitcoinListener {
 
             List<ContractEntity> contractEntities = contractRepository.findAll();
             for (ContractEntity contractEntity : contractEntities) {
-                String privateKey = contractEntity.getDepositBtcAddressPrivateKey();
-                ECKey ecKey = ECKey.fromPrivate(privateKey.getBytes());
-                String hexPubKeyHash = ecKey.getPublicKeyAsHex();
+                ECKey ecKey = DumpedPrivateKey.fromBase58(bitcoinNetworkParameters, contractEntity.getDepositBtcAddressPrivateKey()).getKey();
+                Address senderAddress = ecKey.toAddress(bitcoinNetworkParameters);
+                Script script = ScriptBuilder.createOutputScript(senderAddress);
+                String scriptHashReversed = HexUtils.toHexString(Sha256Hash.of(script.getProgram()).getReversedBytes());
 
                 String responseJson = electrumRpcClient
-                        .sendCommand("blockchain.scripthash.get_history", Collections.singletonList(hexPubKeyHash));
+                        .sendCommand("blockchain.scripthash.get_history", Collections.singletonList(scriptHashReversed));
 
                 List<HistoryResponseRow> historyResponseRows;
                 try {
