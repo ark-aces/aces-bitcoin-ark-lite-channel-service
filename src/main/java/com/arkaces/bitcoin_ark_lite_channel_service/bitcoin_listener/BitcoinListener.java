@@ -79,7 +79,8 @@ public class BitcoinListener {
 
                 List<String> newTxnIds = historyResponseRows.stream()
                         .filter(row -> ! existingTxnIds.contains(row.getTxHash()))
-                        .filter(row -> row.getHeight() != 0 && currentHeight - row.getHeight() > bitcoinMinConfirmations)
+                        .filter(row -> bitcoinMinConfirmations == 0
+                                || (row.getHeight() != 0 && currentHeight - row.getHeight() >= bitcoinMinConfirmations))
                         .map(HistoryResponseRow::getTxHash)
                         .collect(Collectors.toList());
 

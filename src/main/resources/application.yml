@@ -10,9 +10,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: "validate"
-
-spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults: false
-
+    properties:
+      hibernate.temp.use_jdbc_metadata_defaults: false
 
 serverInfo:
   name: "Aces BTC-ARK Lite Channel Service"
@@ -173,6 +172,14 @@ bitcoinMinConfirmations: 1
 electrumNetworkConfigPath: "electrum_network_config/mainnet.yml"
 
 exchangeRate:
+  # CryptoCompare Currency symbol to exchange from
   fromSymbol: "BTC"
+
+  # CryptoCompare Currency symbol to exchange to
   toSymbol: "ARK"
+
+  # A rate multiplier (for testing purposes if using non-mainnet coins)
   multiplier: 1
+
+  # Bypass CryptoCompare API by providing a hard-coded fixedRate
+#  fixedRate: 10.0
