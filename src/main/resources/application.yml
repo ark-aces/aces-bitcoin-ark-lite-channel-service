@@ -11,6 +11,9 @@ spring:
     hibernate:
       ddl-auto: "validate"
 
+spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults: false
+
+
 serverInfo:
   name: "Aces BTC-ARK Lite Channel Service"
   description: "ACES BTC to ARK Lite Channel service for transferring BTC to ARK"
@@ -43,54 +46,115 @@ serverInfo:
       "type": "object",
       "properties": {
         "depositBtcAddress": {
-          "type": "string"
+          "type": "string",
+          "title": "Deposit BTC Address",
+          "description": "Send BTC to this address to execute contract."
         },
         "recipientArkAddress": {
-          "type": "string"
+          "type": "string",
+          "title": "Recipient ARK Address",
+          "description": "ARK will arrive at this address on contract execution."
+        },
+        "returnBtcAddress": {
+          "type": "string",
+          "title": "Return BTC Address",
+          "description": "Returned BTC amounts are sent to this address."
         },
         "transfers": {
           "type": "array",
           "properties": {
-            "btcAmount": {
-              "type": "string"
+            "id": {
+                "type": "string",
+                "title": "Transfer ID",
+                "description": "Identifier for transfer"
             },
-            "btcToArkRate": {
-              "type": "string"
-            },
-            "btcFlatFee": {
-              "type": "string"
-            },
-            "btcPercentFee": {
-              "type": "string"
-            },
-            "btcTotalFee": {
-              "type": "string"
-            },
-            "arkSendAmount": {
-              "type": "string"
-            },
-            "arkTransactionId": {
-              "type": "string"
+            "status": {
+                "type": "string",
+                 "title": "Status",
+                 "description": "The status of the transfer"
             },
             "createdAt": {
-              "type": "string"
+              "type": "string",
+              "title": "Create Date",
+              "description": "The time the contract was created."
+            },
+            "btcTransactionId": {
+              "type": "string",
+              "title": "Transaction ID (BTC)",
+              "description": "The transaction ID for the BTC contract fulfillment"
+            },
+            "btcAmount": {
+              "type": "string",
+              "title": "Transfer Amount (BTC)",
+              "description": "The amount of BTC to transfer"
+            },
+            "btcToArkRate": {
+              "type": "string",
+              "title": "ARK/BTC Exchange Rate",
+              "description": "Amount of ARK to receive per BTC"
+            },
+            "btcFlatFee": {
+              "type": "string",
+              "title": "Flat Fee (BTC)",
+              "description": "Fixed fee per execution, charged in BTC"
+            },
+            "btcPercentFee": {
+              "type": "string",
+              "title": "Percentage Fee (BTC)",
+              "description": "Percentage fee per execution, charged in BTC"
+            },
+            "btcTotalFee": {
+              "type": "string",
+              "title": "Total Fees (BTC)",
+              "description": "The sum of flat fees and percentage fees, charged in BTC"
+            },
+            "arkSendAmount": {
+              "type": "string",
+              "title": "Receiving Amount (ARK)",
+              "Description": "Total ARK to be received, net of fees"
+            },
+            "arkTransactionId": {
+              "type": "string",
+              "title": "Transaction ID (ARK)",
+              "description": "The transaction ID for the ARK contract fulfillment"
+            },
+            "returnBtcTransactionId": {
+              "type": "string",
+              "title": "Transaction ID (BTC)",
+              "description": "The transaction ID for the BTC contract return"
             }
           }
         }
       }
     }
+  outputSchemaUrlTemplates:
+    -
+      property: "depositBtcAddress"
+      urlTemplate: "https://live.blockcypher.com/btc/address/{value}/"
+    -
+      property: "recipientArkAddress"
+      urlTemplate: "https://explorer.ark.io/wallets/{value}"
+    -
+      property: "transfers.btcTransactionId"
+      urlTemplate: "https://live.blockcypher.com/btc/tx/{value}/"
+    -
+      property: "transfers.arkTransactionId"
+      urlTemplate: "https://explorer.ark.io/transaction/{value}"
+    -
+      property: "transfers.returnBtcTransactionId"
+      urlTemplate: "https://live.blockcypher.com/btc/tx/{value}/"
+
 
 arkNetworkConfigPath: "ark_network_config/mainnet.yml"
 
-serviceCapacityUnit: "ARK"
+capacityUnit: "ARK"
 
-serviceCapacityUpdateIntervalSec: 3600
+capacityUpdateIntervalSec: 3600
 
 bitcoinScanIntervalSec: 10
 
-flatFee:
-  amount: 0.0001
-  unit: "BTC"
+flatFee: 0.0001
+flatFeeUnit: "BTC"
 
 percentFee: 1
 
@@ -104,3 +168,8 @@ serviceBitcoinAccount:
 bitcoinMinConfirmations: 1
 
 electrumNetworkConfigPath: "electrum_network_config/mainnet.yml"
+
+exchangeRate:
+  fromSymbol: "BTC"
+  toSymbol: "ARK"
+  multiplier: 1

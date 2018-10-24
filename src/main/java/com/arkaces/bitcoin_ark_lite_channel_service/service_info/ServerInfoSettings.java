@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "serverInfo")
+@ConfigurationProperties(prefix = "server-info")
 public class ServerInfoSettings {
     private String name;
     private String description;
@@ -19,5 +19,6 @@ public class ServerInfoSettings {
     private List<Capacity> capacities;
     private String inputSchema;
     private String outputSchema;
+    private List<PropertyUrlTemplate> outputSchemaUrlTemplates;
     private List<String> interfaces;
 }

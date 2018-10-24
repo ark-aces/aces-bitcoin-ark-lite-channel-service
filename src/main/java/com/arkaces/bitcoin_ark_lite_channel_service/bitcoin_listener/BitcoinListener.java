@@ -2,6 +2,7 @@ package com.arkaces.bitcoin_ark_lite_channel_service.bitcoin_listener;
 
 import com.arkaces.bitcoin_ark_lite_channel_service.contract.ContractEntity;
 import com.arkaces.bitcoin_ark_lite_channel_service.contract.ContractRepository;
+import com.arkaces.bitcoin_ark_lite_channel_service.electrum.ElectrumObjectMapperFactory;
 import com.arkaces.bitcoin_ark_lite_channel_service.electrum.ElectrumRpcClient;
 import com.arkaces.bitcoin_ark_lite_channel_service.electrum.RpcResponse;
 import com.arkaces.bitcoin_ark_lite_channel_service.transfer.BitcoinTransaction;
@@ -19,8 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,9 +39,10 @@ public class BitcoinListener {
     private final Integer bitcoinMinConfirmations;
     private final NetworkParameters bitcoinNetworkParameters;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ElectrumObjectMapperFactory().create();
 
     @Scheduled(fixedDelayString = "${bitcoinScanIntervalSec}000")
+    @Transactional
     public void scan() {
         log.info("Scanning for new transactions");
         try {
@@ -47,11 +51,12 @@ public class BitcoinListener {
             RpcResponse<BlockHeaderResponse> rpcResponse = objectMapper.readValue(blockHeaderResponseJson,
                     new TypeReference<RpcResponse<BlockHeaderResponse>>(){});
             BlockHeaderResponse blockHeaderResponse = rpcResponse.getResult();
-            Integer currentHeight = blockHeaderResponse.getBlockHeight();
+            Integer currentHeight = blockHeaderResponse.getHeight();
 
             List<ContractEntity> contractEntities = contractRepository.findAll();
             for (ContractEntity contractEntity : contractEntities) {
-                ECKey ecKey = DumpedPrivateKey.fromBase58(bitcoinNetworkParameters, contractEntity.getDepositBtcAddressPrivateKey()).getKey();
+                ECKey ecKey = DumpedPrivateKey.fromBase58(bitcoinNetworkParameters, contractEntity.getDepositBtcAddressPrivateKey())
+                        .getKey();
                 Address senderAddress = ecKey.toAddress(bitcoinNetworkParameters);
                 Script script = ScriptBuilder.createOutputScript(senderAddress);
                 String scriptHashReversed = HexUtils.toHexString(Sha256Hash.of(script.getProgram()).getReversedBytes());
@@ -73,14 +78,14 @@ public class BitcoinListener {
                         .collect(Collectors.toList());
 
                 List<String> newTxnIds = historyResponseRows.stream()
-                        .filter(row -> !existingTxnIds.contains(row.getTxHash()))
-                        .filter(row -> currentHeight - row.getHeight() > bitcoinMinConfirmations)
+                        .filter(row -> ! existingTxnIds.contains(row.getTxHash()))
+                        .filter(row -> row.getHeight() != 0 && currentHeight - row.getHeight() > bitcoinMinConfirmations)
                         .map(HistoryResponseRow::getTxHash)
                         .collect(Collectors.toList());
 
                 for (String txnId : newTxnIds) {
                     String txnResponseJson = electrumRpcClient
-                            .sendCommand("blockchain.transaction.get", Collections.singletonList(txnId));
+                            .sendCommand("blockchain.transaction.get", Arrays.asList(txnId, true));
 
                     BitcoinTransaction bitcoinTransaction;
                     try {

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +28,10 @@ public class ElectrumRpcClient {
     public String sendCommand(String method, List<Object> params) {
         ElectrumNode electrumNode = getRandomElectrumNode();
         try {
-            Socket socket = new Socket(electrumNode.getHost(), electrumNode.getPort());
+            InetSocketAddress socketAddress = new InetSocketAddress(electrumNode.getHost(), electrumNode.getPort());
+            Socket socket = new Socket();
+            socket.connect(socketAddress, 2000);
+            socket.setSoTimeout(2000);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF8"));
 
@@ -53,6 +57,7 @@ public class ElectrumRpcClient {
             return commandResponse;
         }
         catch (IOException e) {
+            log.info("Exception connecting to electrum node: " + electrumNode.toString());
             throw new RuntimeException("IO Exception thrown", e);
         }
     }

@@ -49,7 +49,7 @@ public class ServiceCapacityService {
             serviceCapacityEntity.setAvailableAmount(accountBalance);
             serviceCapacityEntity.setUnsettledAmount(BigDecimal.ZERO);
             serviceCapacityEntity.setTotalAmount(accountBalance);
-            serviceCapacityEntity.setUnit(environment.getProperty("serviceCapacityUnit"));
+            serviceCapacityEntity.setUnit(environment.getProperty("capacityUnit"));
             serviceCapacityEntity.setCreatedAt(now);
             serviceCapacityEntity.setUpdatedAt(now);
         } else {
@@ -59,7 +59,7 @@ public class ServiceCapacityService {
             
             serviceCapacityEntity.setAvailableAmount(availableAmount);
             serviceCapacityEntity.setTotalAmount(accountBalance);
-            serviceCapacityEntity.setUnit(environment.getProperty("serviceCapacityUnit"));
+            serviceCapacityEntity.setUnit(environment.getProperty("capacityUnit"));
             serviceCapacityEntity.setUpdatedAt(now);
 
         }

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "serviceArkAccount")
+@ConfigurationProperties(prefix = "service-ark-account")
 public class ServiceArkAccountSettings {
     private String address;
     private String passphrase;

@@ -53,7 +53,11 @@ public class ServerInfoController {
         serverInfo.setInputSchema(inputSchemaJsonNode);
         serverInfo.setOutputSchema(outputSchemaJsonNode);
         serverInfo.setInterfaces(Collections.singletonList("transferChannel"));
-        
+
+        serverInfo.setOutputSchemaUrlTemplates(serverInfoSettings.getOutputSchemaUrlTemplates());
+
+        serverInfo.setExchangeRateHref("/exchangeRate");
+
         Capacity capacity = new Capacity();
         capacity.setUnit(config.getCapacityUnit());
         capacity.setValue(serviceCapacityService.getAvailableAmount());
