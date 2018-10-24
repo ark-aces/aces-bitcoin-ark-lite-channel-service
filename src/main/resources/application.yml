@@ -132,6 +132,9 @@ serverInfo:
       property: "depositBtcAddress"
       urlTemplate: "https://live.blockcypher.com/btc/address/{value}/"
     -
+      property: "returnBtcAddress"
+      urlTemplate: "https://live.blockcypher.com/btc/address/{value}/"
+    -
       property: "recipientArkAddress"
       urlTemplate: "https://explorer.ark.io/wallets/{value}"
     -
