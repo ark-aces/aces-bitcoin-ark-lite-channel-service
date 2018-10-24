@@ -60,7 +60,7 @@ curl http://localhost:9190/
   "percentFee" : "1.00",
   "capacities": [{
     "value": "50.00",
-    "unit": "BTC"
+    "unit": "ARK"
   }],
   "inputSchema" : {
     "type" : "object",

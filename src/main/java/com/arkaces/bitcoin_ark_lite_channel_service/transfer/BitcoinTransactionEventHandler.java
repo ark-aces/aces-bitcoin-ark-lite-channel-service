@@ -73,7 +73,7 @@ public class BitcoinTransactionEventHandler {
         }
         transferEntity.setBtcAmount(incomingBtcAmount);
 
-        BigDecimal btcToArkRate = exchangeRateService.getRate("BTC", "ARK"); //2027.58, Ark 8, Btc 15000
+        BigDecimal btcToArkRate = exchangeRateService.getRate();
         transferEntity.setBtcToArkRate(btcToArkRate);
         
         transferEntity.setBtcFlatFee(config.getFlatFee());
