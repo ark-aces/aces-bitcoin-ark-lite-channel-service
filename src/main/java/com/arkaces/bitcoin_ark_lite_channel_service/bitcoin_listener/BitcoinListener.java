@@ -66,9 +66,9 @@ public class BitcoinListener {
 
                 List<HistoryResponseRow> historyResponseRows;
                 try {
-                    RpcResponse<List<HistoryResponseRow>> historyRpcResposne = objectMapper.readValue(responseJson,
+                    RpcResponse<List<HistoryResponseRow>> historyRpcResponse = objectMapper.readValue(responseJson,
                         new TypeReference<RpcResponse<List<HistoryResponseRow>>>() {});
-                    historyResponseRows = historyRpcResposne.getResult();
+                    historyResponseRows = historyRpcResponse.getResult();
                 } catch (IOException e) {
                     throw new RuntimeException("Failed to parse json response", e);
                 }
