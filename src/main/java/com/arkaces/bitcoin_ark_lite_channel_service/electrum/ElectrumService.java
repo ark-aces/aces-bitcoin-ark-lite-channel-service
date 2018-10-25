@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ElectrumService {
 
-    private static final BigInteger SATOSHIS_PER_BTC = new BigInteger("100000000");
+    public static final BigInteger SATOSHIS_PER_BTC = new BigInteger("100000000");
 
     private final ElectrumRpcClient electrumRpcClient;
     private final NetworkParameters bitcoinNetworkParameters;

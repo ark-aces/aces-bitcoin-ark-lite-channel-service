@@ -3,9 +3,12 @@ package com.arkaces.bitcoin_ark_lite_channel_service;
 import ark_java_client.*;
 import ark_java_client.lib.ResourceUtils;
 import com.arkaces.aces_server.aces_service.config.AcesServiceConfig;
+import com.arkaces.aces_server.aces_service.notification.NotificationService;
+import com.arkaces.aces_server.aces_service.notification.NotificationServiceFactory;
 import com.arkaces.bitcoin_ark_lite_channel_service.electrum.ElectrumNetworkSettings;
 import com.arkaces.bitcoin_ark_lite_channel_service.electrum.ElectrumNode;
 import org.bitcoinj.core.NetworkParameters;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -13,9 +16,11 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.env.Environment;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.mail.MailSender;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Configuration
@@ -69,4 +74,27 @@ public class ApplicationConfig {
                 throw new IllegalArgumentException("Bitcoin network type invalid: " + electrumNetworkSettings.getNetwork());
         }
     }
+
+    @Bean
+    @ConditionalOnProperty(value = "notifications.enabled", havingValue = "true")
+    public NotificationService emailNotificationService(Environment environment, MailSender mailSender) {
+        return new NotificationServiceFactory().createEmailNotificationService(
+                environment.getProperty("serverInfo.name"),
+                environment.getProperty("notifications.fromEmailAddress"),
+                environment.getProperty("notifications.recipientEmailAddress"),
+                mailSender
+        );
+    }
+
+    @Bean
+    @ConditionalOnProperty(value = "notifications.enabled", havingValue = "false", matchIfMissing = true)
+    public NotificationService noOpNotificationService() {
+        return new NotificationServiceFactory().createNoOpNotificationService();
+    }
+
+    @Bean
+    public BigDecimal lowCapacityThreshold(Environment environment) {
+        return environment.getProperty("lowCapacityThreshold", BigDecimal.class);
+    }
+
 }

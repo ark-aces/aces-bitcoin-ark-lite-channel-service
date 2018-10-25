@@ -1,15 +1,18 @@
 package com.arkaces.bitcoin_ark_lite_channel_service.transfer;
 
+import com.arkaces.aces_server.aces_service.notification.NotificationService;
 import com.arkaces.bitcoin_ark_lite_channel_service.Constants;
 import com.arkaces.bitcoin_ark_lite_channel_service.ServiceBitcoinAccountSettings;
 import com.arkaces.bitcoin_ark_lite_channel_service.ark.ArkService;
 import com.arkaces.bitcoin_ark_lite_channel_service.contract.ContractEntity;
+import com.arkaces.bitcoin_ark_lite_channel_service.electrum.ElectrumRpcClient;
 import com.arkaces.bitcoin_ark_lite_channel_service.electrum.ElectrumService;
 import com.arkaces.bitcoin_ark_lite_channel_service.service_capacity.ServiceCapacityEntity;
 import com.arkaces.bitcoin_ark_lite_channel_service.service_capacity.ServiceCapacityRepository;
 import com.arkaces.bitcoin_ark_lite_channel_service.service_capacity.ServiceCapacityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bitcoinj.core.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +31,8 @@ public class TransferService {
     private final ServiceCapacityService serviceCapacityService;
     private final ServiceCapacityRepository serviceCapacityRepository;
     private final ServiceBitcoinAccountSettings serviceBitcoinAccountSettings;
+    private final NotificationService notificationService;
+    private final BigDecimal lowCapacityThreshold;
 
     /**
      * @return true if amount reserved successfully
@@ -47,6 +52,10 @@ public class TransferService {
         serviceCapacityEntity.setAvailableAmount(newAvailableAmount);
         serviceCapacityEntity.setUnsettledAmount(newUnsettledAmount);
         serviceCapacityRepository.save(serviceCapacityEntity);
+
+        if (serviceCapacityEntity.getAvailableAmount().compareTo(lowCapacityThreshold) <= 0) {
+            notificationService.notifyLowCapacity(serviceCapacityEntity.getAvailableAmount(), serviceCapacityEntity.getUnit());
+        }
         
         return true;
     }
@@ -83,6 +92,11 @@ public class TransferService {
         transferRepository.save(transferEntity);
 
         log.info("Saved transfer id " + transferEntity.getId() + " to contract " + contractEntity.getId());
+
+        notificationService.notifySuccessfulTransfer(
+                transferEntity.getContractEntity().getId(),
+                transferEntity.getId()
+        );
     }
 
     /**
@@ -96,9 +110,12 @@ public class TransferService {
 
         String returnBtcAddress = transferEntity.getContractEntity().getReturnBtcAddress();
         if (returnBtcAddress != null) {
+            BigDecimal bitcoinFee = new BigDecimal(Transaction.DEFAULT_TX_FEE.longValue())
+                .divide(new BigDecimal(ElectrumService.SATOSHIS_PER_BTC), 10, BigDecimal.ROUND_HALF_UP);
+            BigDecimal returnBtcAmount = transferEntity.getBtcAmount().subtract(bitcoinFee);
             String returnBtcTransactionId = electrumService.sendTransaction(
                     returnBtcAddress,
-                    transferEntity.getBtcAmount(),
+                    returnBtcAmount,
                     serviceBitcoinAccountSettings.getPrivateKey()
             );
             transferEntity.setStatus(TransferStatus.RETURNED);
@@ -109,12 +126,24 @@ public class TransferService {
         }
 
         transferRepository.save(transferEntity);
+
+        notificationService.notifyFailedTransfer(
+                transferEntity.getContractEntity().getId(),
+                transferEntity.getId(),
+                "Insufficient ark to send transfer id = " + transferEntity.getId()
+        );
     }
     
-    public void processFailedTransfer(Long transferPid) {
+    public void processFailedTransfer(Long transferPid, String reasonMessage) {
         TransferEntity transferEntity = transferRepository.findOneForUpdate(transferPid);
         transferEntity.setStatus(TransferStatus.FAILED);
         transferRepository.save(transferEntity);
+
+        notificationService.notifyFailedTransfer(
+                transferEntity.getContractEntity().getId(),
+                transferEntity.getId(),
+                reasonMessage
+        );
     }
     
 }
