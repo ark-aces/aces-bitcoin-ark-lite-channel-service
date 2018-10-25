@@ -161,7 +161,7 @@ capacityUnit: "ARK"
 
 capacityUpdateIntervalSec: 3600
 
-bitcoinScanIntervalSec: 10
+bitcoinScanIntervalSec: 60
 
 flatFee: 0.0001
 flatFeeUnit: "BTC"
