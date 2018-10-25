@@ -19,7 +19,7 @@ postgres:9.6.1
 
 ### Configuration
 
-Copy [/main/resources/application.yml](main/resources/application.yml) into an external file on your system
+Copy [/main/resources/application.yml](src/main/resources/application.yml) into an external file on your system
 (for example: `/etc/{service-name}/application.yml`) and replace configuration properties to match your
 local setup. For example, you would need to change the service address and passphrase to an actual account.
 
